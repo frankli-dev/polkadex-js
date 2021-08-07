@@ -5,9 +5,9 @@ import {RegistryTypes} from '@polkadot/types/types';
 import WebSocketAsPromised from 'websocket-as-promised';
 import type {KeyringPair} from '@polkadot/keyring/types';
 import type {u32} from '@polkadot/types';
-import type {PlaceOrderArgs, TrustedCallSigned} from '../../types/interfaces';
+import type {DirectRequest, PlaceOrderArgs, TrustedCallSigned, TrustedOperation} from '../../types/interfaces';
 import {IPolkadexWorker, WorkerOptions} from "./interface";
-import {createTrustedCall, TrustedCallArgs} from "./trustedCallApi";
+import {createDirectRequest, createTrustedCall, createTrustedOperation, TrustedCallArgs} from "./trustedCallApi";
 
 const unwrapWorkerResponse = (self: IPolkadexWorker, data: string) => {
     /// Unwraps the value that is wrapped in all the Options and encoding from the worker.
@@ -85,6 +85,14 @@ export class PolkadexWorker extends WebSocketAsPromised implements IPolkadexWork
 
     public trustedCallPlaceOrder(accountOrPubKey: KeyringPair, mrenclave: string, nonce: u32, params: TrustedCallArgs): TrustedCallSigned {
         return createTrustedCall(this, ['place_order', 'PlaceOrderArgs'], accountOrPubKey, mrenclave, nonce, params)
+    }
+
+    public trustedOperationDirectCall(trustedCallSigned: TrustedCallSigned): TrustedOperation {
+        return createTrustedOperation(this, ['direct_call', 'TrustedCallSigned'], trustedCallSigned)
+    }
+
+    public createRequest(trustedOperation: TrustedOperation, mrenclave: string): DirectRequest{
+        return createDirectRequest(this, trustedOperation, mrenclave)
     }
 
 }

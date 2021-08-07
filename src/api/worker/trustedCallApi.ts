@@ -1,12 +1,20 @@
 import {KeyringPair} from "@polkadot/keyring/types";
 import {u32} from "@polkadot/types";
-import {CancelOrderArgs, PlaceOrderArgs, TrustedCallSigned, WithdrawArgs} from "../../types/interfaces";
+import {
+    CancelOrderArgs, DirectRequest,
+    PlaceOrderArgs,
+    TrustedCallSigned,
+    TrustedOperation,
+    WithdrawArgs
+} from "../../types/interfaces";
 import {IPolkadexWorker} from "./interface";
 import bs58 from "bs58";
+import {localNetwork} from "../../../tests/worker/localNetwork";
 
 export type TrustedCallArgs = (PlaceOrderArgs | CancelOrderArgs | WithdrawArgs);
 
 export type TrustedCallVariant = [string, string]
+export type TrustedOperationVariant = [string, string]
 
 export const createTrustedCall = (
     self: IPolkadexWorker,
@@ -24,11 +32,30 @@ export const createTrustedCall = (
         [variant]: self.createType(argType, params)
     });
 
-    const payload = Uint8Array.from([...call.toU8a(), ...nonce.toU8a()]);
-
     return self.createType('TrustedCallSigned', {
         call: call,
         nonce: nonce,
-        signature: accountOrPubKey.sign(payload)
+        signature: accountOrPubKey.sign(call.toU8a())
     });
+}
+
+export const createTrustedOperation = (
+    self: IPolkadexWorker,
+    trustedOperation: TrustedOperationVariant,
+    signedCall: TrustedCallSigned
+): TrustedOperation => {
+    const [variant, argType] = trustedOperation;
+    return self.createType('TrustedOperation', {
+        [variant]: self.createType(argType, signedCall)
+    });
+}
+
+export const createDirectRequest = (
+    self: IPolkadexWorker,
+    trustedOperation: TrustedOperation,
+    mrenclave: string
+): DirectRequest => {
+    const shard = self.createType("ShardIdentifier", bs58.decode(mrenclave));
+    const encoded_txt = self.createType("Vec<u8>", trustedOperation.toHex());
+    return self.createType("DirectRequest", [shard, encoded_txt])
 }

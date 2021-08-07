@@ -29,7 +29,11 @@ export interface balanceTransferArgs extends ITuple<[AccountId, AccountId, Balan
 export interface balanceUnshieldArgs extends ITuple<[AccountId, AccountId, Balance, ShardIdentifier]> {}
 
 /** @name CancelOrder */
-export interface CancelOrder extends Struct {}
+export interface CancelOrder extends Struct {
+  readonly user_uid: UserId;
+  readonly market_id: MarketId;
+  readonly order_id: OrderUUID;
+}
 
 /** @name CancelOrderArgs */
 export interface CancelOrderArgs extends ITuple<[AccountId, CancelOrder, Option<AccountId>]> {}
@@ -81,6 +85,9 @@ export interface OrderType extends Enum {
   readonly isPostOnly: boolean;
   readonly isFillOrKill: boolean;
 }
+
+/** @name OrderUUID */
+export interface OrderUUID extends Bytes {}
 
 /** @name PlaceOrderArgs */
 export interface PlaceOrderArgs extends ITuple<[AccountId, Order, Option<AccountId>]> {}
