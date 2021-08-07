@@ -1,10 +1,12 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es5",
+    "target": "es2017",
     "sourceMap": true,
     "declaration": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
   },
   "exclude": [
     "node_modules"
