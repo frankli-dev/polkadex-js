@@ -25,7 +25,7 @@ export const createTrustedCall = (
 ): TrustedCallSigned => {
 
     const [variant, argType] = trustedCall;
-    const mrenclave_codec_type = self.createType('Hash', bs58.decode(mrenclave));
+    const mrenclave_codec_type = self.createType('Hash', mrenclave);
 
     const call = self.createType('TrustedCall', {
         [variant]: self.createType(argType, params)
@@ -38,12 +38,13 @@ export const createTrustedCall = (
     // payload.append(&mut mrenclave.encode());
     // payload.append(&mut shard.encode());
     // NOTE: For now, MRENCLAVE==SHARD
-    let payload = new Uint8Array([call.toU8a(), nonce.toU8a(), mrenclave_codec_type.toU8a(), mrenclave_codec_type.toU8a() ]);
-
+    let payload = new Uint8Array([call.toU8a(), nonce.toU8a(), mrenclave_codec_type.toU8a(), mrenclave_codec_type.toU8a()]);
+    let signature = self.createType('Signature', accountOrPubKey.sign(payload));
+    console.log("Signature: ", signature.toHex())
     return self.createType('TrustedCallSigned', {
         call: call,
         nonce: nonce,
-        signature: self.createType('Signature',accountOrPubKey.sign(payload))
+        signature: signature
     });
 }
 

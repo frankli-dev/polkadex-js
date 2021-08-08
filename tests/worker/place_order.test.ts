@@ -10,6 +10,7 @@ const {w3cwebsocket: WebSocket} = WS;
 
 import * as mocha from 'mocha';
 import * as chai from 'chai';
+import {createTrustedCall} from "../../src/api/worker/trustedCallApi";
 
 const expect = chai.expect;
 describe('Worker Tests', async () => {
@@ -42,10 +43,15 @@ describe('Worker Tests', async () => {
         const nonce = worker.createType('u32', 0);
         const place_order_params = worker.createType('PlaceOrderArgs', [alice.address, order, alice.address]);
 
-        // the last 64 bytes are from the non-deterministic signature, so we are trimming that.
+        const trustedCall = worker.createType('TrustedCall', {['place_order']: worker.createType('PlaceOrderArgs', place_order_params)});
+        expect(trustedCall.toHex()).to.equal(PlaceOrderTestValues().trustedCall);
 
+        // the last 64 bytes are from the non-deterministic signature, so we are trimming that.
         const trustedcallsigned = worker.trustedCallPlaceOrder(alice, network.mrenclave, nonce, place_order_params);
         console.log("trustedcallsigned: ", trustedcallsigned.toHex());
+        // TODO:
+        //      Rust generates 138 characters with 128 being signature
+        //      but TS generates 136 characters with 126 being signature. Why is this happening
         expect(trustedcallsigned.toHex().slice(0, -128)).to.equal(PlaceOrderTestValues().trustedCallSigned);
 
         const trustedOperation = worker.trustedOperationDirectCall(trustedcallsigned);
