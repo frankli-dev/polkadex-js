@@ -54,14 +54,8 @@ describe('Worker Tests', async () => {
         expect(trustedOperation.toHex().slice(0, -128)).to.equal(PlaceOrderTestValues().trustedOperation);
         const direct_request = worker.createRequest(trustedOperation, network.mrenclave);
         console.log("direct_request: ", direct_request.toHex().slice(0, -128));
+        // TODO: There one character difference with test value from rust code, resulting in unit test failure
         expect(direct_request.toHex().slice(0, -128)).to.equal(PlaceOrderTestValues().direct_request);
     });
 
 });
-
-function toHexString(byteArray) {
-    return '0x' + Array.from(byteArray, function (byte) {
-        // @ts-ignore
-        return ('0' + (byte & 0xFF).toString(16)).slice(-2);
-    }).join('')
-}

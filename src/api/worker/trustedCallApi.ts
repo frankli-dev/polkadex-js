@@ -65,8 +65,7 @@ export const createDirectRequest = (
     trustedOperation: TrustedOperation,
     mrenclave: string
 ): DirectRequest => {
-    const shard = self.createType("ShardIdentifier", bs58.decode(mrenclave));
-    const encoded_txt = self.createType("Vec<u8>", trustedOperation.toHex());
-    console.log("encoded_txt: ",encoded_txt.toHex());
+    let shard = self.createType("ShardIdentifier", bs58.decode(mrenclave));
+    let encoded_txt = self.createType("Vec<u8>", trustedOperation.toHex());
     return self.createType("DirectRequest", [shard, encoded_txt])
 }
