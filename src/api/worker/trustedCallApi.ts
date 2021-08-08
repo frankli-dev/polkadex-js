@@ -44,7 +44,7 @@ export const createTrustedCall = (
     return self.createType('TrustedCallSigned', {
         call: call,
         nonce: nonce,
-        signature: accountOrPubKey.sign(payload)
+        signature: self.createType('Signature',accountOrPubKey.sign(payload))
     });
 }
 
