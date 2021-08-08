@@ -26,16 +26,25 @@ export const createTrustedCall = (
 ): TrustedCallSigned => {
 
     const [variant, argType] = trustedCall;
-    const hash = self.createType('Hash', bs58.decode(mrenclave));
+    const mrenclave_scale_type = self.createType('Hash', bs58.decode(mrenclave));
 
     const call = self.createType('TrustedCall', {
         [variant]: self.createType(argType, params)
     });
 
+    let payload = new Uint8Array([call.toU8a(), nonce.toU8a(), mrenclave_scale_type.toU8a(), mrenclave_scale_type.toU8a() ]);
+    // payload for signing = call + nonce + mrenclave + shard
+    // How it's done in rust
+    // let mut payload = self.encode();
+    // payload.append(&mut nonce.encode());
+    // payload.append(&mut mrenclave.encode());
+    // payload.append(&mut shard.encode());
+    // NOTE: For now, MRENCLAVE==SHARD
+
     return self.createType('TrustedCallSigned', {
         call: call,
         nonce: nonce,
-        signature: accountOrPubKey.sign(call.toU8a())
+        signature: accountOrPubKey.sign(payload)
     });
 }
 
