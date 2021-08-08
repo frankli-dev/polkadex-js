@@ -9,7 +9,6 @@ import {
 } from "../../types/interfaces";
 import {IPolkadexWorker} from "./interface";
 import bs58 from "bs58";
-import {localNetwork} from "../../../tests/worker/localNetwork";
 
 export type TrustedCallArgs = (PlaceOrderArgs | CancelOrderArgs | WithdrawArgs);
 
@@ -26,13 +25,12 @@ export const createTrustedCall = (
 ): TrustedCallSigned => {
 
     const [variant, argType] = trustedCall;
-    const mrenclave_scale_type = self.createType('Hash', bs58.decode(mrenclave));
+    const mrenclave_codec_type = self.createType('Hash', bs58.decode(mrenclave));
 
     const call = self.createType('TrustedCall', {
         [variant]: self.createType(argType, params)
     });
 
-    let payload = new Uint8Array([call.toU8a(), nonce.toU8a(), mrenclave_scale_type.toU8a(), mrenclave_scale_type.toU8a() ]);
     // payload for signing = call + nonce + mrenclave + shard
     // How it's done in rust
     // let mut payload = self.encode();
@@ -40,6 +38,7 @@ export const createTrustedCall = (
     // payload.append(&mut mrenclave.encode());
     // payload.append(&mut shard.encode());
     // NOTE: For now, MRENCLAVE==SHARD
+    let payload = new Uint8Array([call.toU8a(), nonce.toU8a(), mrenclave_codec_type.toU8a(), mrenclave_codec_type.toU8a() ]);
 
     return self.createType('TrustedCallSigned', {
         call: call,
