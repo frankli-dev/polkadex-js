@@ -58,6 +58,7 @@ export const createTrustedOperation = (
         [variant]: self.createType(argType, signedCall)
     });
 }
+import { hexToU8a } from '@polkadot/util';
 
 export const createDirectRequest = (
     self: IPolkadexWorker,
@@ -66,5 +67,6 @@ export const createDirectRequest = (
 ): DirectRequest => {
     const shard = self.createType("ShardIdentifier", bs58.decode(mrenclave));
     const encoded_txt = self.createType("Vec<u8>", trustedOperation.toHex());
+    console.log("encoded_txt: ",encoded_txt.toHex());
     return self.createType("DirectRequest", [shard, encoded_txt])
 }

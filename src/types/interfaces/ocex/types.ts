@@ -4,7 +4,7 @@
 import type { Bytes, Enum, Option, Struct, u128 } from '@polkadot/types';
 import type { ITuple } from '@polkadot/types/types';
 import type { Signature } from '@polkadot/types/interfaces/extrinsics';
-import type { AccountId, Balance, H160, Hash, Index } from '@polkadot/types/interfaces/runtime';
+import type { AccountId, Balance, H160, H256, Index } from '@polkadot/types/interfaces/runtime';
 
 /** @name AssetId */
 export interface AssetId extends Enum {
@@ -98,7 +98,7 @@ export interface PublicGetter extends Enum {
 }
 
 /** @name ShardIdentifier */
-export interface ShardIdentifier extends Hash {}
+export interface ShardIdentifier extends H256 {}
 
 /** @name TrustedCall */
 export interface TrustedCall extends Enum {

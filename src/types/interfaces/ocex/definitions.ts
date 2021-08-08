@@ -2,7 +2,7 @@
 
 export default {
     types: {
-        ShardIdentifier: 'Hash',
+        ShardIdentifier: 'H256',
         UserId: 'AccountId',
         OrderUUID: 'Vec<u8>',
         Order: {
