@@ -48,14 +48,14 @@ describe('Worker Tests', async () => {
 
         // the last 64 bytes are from the non-deterministic signature, so we are trimming that.
         const trustedcallsigned = worker.trustedCallPlaceOrder(alice, network.mrenclave, nonce, place_order_params);
-        console.log("trustedcallsigned: ", trustedcallsigned.toHex());
+        // console.log("trustedcallsigned: ", trustedcallsigned.toHex());
         // TODO:
         //      Rust generates 138 characters with 128 being signature
         //      but TS generates 136 characters with 126 being signature. Why is this happening
         expect(trustedcallsigned.toHex().slice(0, -128)).to.equal(PlaceOrderTestValues().trustedCallSigned);
 
         const trustedOperation = worker.trustedOperationDirectCall(trustedcallsigned);
-        console.log("trustedOperation: ", trustedOperation.toHex());
+        // console.log("trustedOperation: ", trustedOperation.toHex());
         expect(trustedOperation.toHex().slice(0, -128)).to.equal(PlaceOrderTestValues().trustedOperation);
 
         const direct_request = worker.createRequest(trustedOperation, network.mrenclave);

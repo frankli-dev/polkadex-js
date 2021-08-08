@@ -2,7 +2,7 @@ export const localNetwork = () => {
     return {
         chain: 'ws://127.0.0.1:9979',
         worker: 'ws://127.0.0.1:2079',
-        mrenclave: '5PgBS5zCJdy3Zb6LMS4iU9jhZEjuLZHJZNCu7V13xMKe',
+        mrenclave: '31kgJRyQ6Atu3bVwJEzcXLoMQRLJjgEnZNmhakq5gMQY',
         types: {
             ShardIdentifier: 'Hash',
             UserId: 'AccountId',
