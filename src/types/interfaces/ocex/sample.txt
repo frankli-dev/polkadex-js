@@ -1,0 +1,48 @@
+pub enum GatewayError {
+    /// Price is Not Provided
+    PriceIsNull,
+    ///Quantity zero in MarketOrder
+    QuantityZeroInMarketOrder,
+    ///Price zero in MarketOrder
+    PriceZeroInMarketOrder,
+    ///Quantity or Price zero in LimitOrder
+    QuantityOrPriceZeroInLimitOrder,
+    /// Nonce not present
+    NonceNotPresent,
+    /// Nonce Invalid
+    NonceInvalid,
+    /// Price for limit Order not found
+    LimitOrderPriceNotFound, // FIXME Duplicate
+    /// Not implemented yet
+    NotImplementedYet,
+    /// Order Not found for given OrderUUID
+    OrderNotFound,
+    /// Proxy account not associated with Main acc
+    ProxyNotRegisteredForMainAccount,
+    /// Main account is not registered,
+    MainAccountNotRegistered,
+    /// Undefined Behaviour
+    UndefinedBehaviour,
+    /// Error in cancelling the order
+    UnableToCancelOrder,
+    /// MarketIds don't match for given trade, maker, and taker
+    MarketIdMismatch,
+    /// Maker OrderSide mismatch between TradeEvent and MakerOrder
+    MakerSideMismatch,
+    /// Unable to Load pointer
+    UnableToLoadPointer,
+    /// Not enough Free Balance
+    NotEnoughFreeBalance,
+    /// Not enough Reserved Balance,
+    NotEnoughReservedBalance,
+    /// Unable to find AcccountId or AssetId,
+    AccountIdOrAssetIdNotFound,
+    /// Could not load pointer
+    NullPointer,
+    /// Could acquire mutx
+    UnableToLock,
+    /// Error within OpenFinex api part
+    OpenFinexApiError(OpenFinexApiError),
+    /// Error within polkadex account registry
+    AccountRegistryError(AccountRegistryError),
+}

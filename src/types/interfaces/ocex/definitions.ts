@@ -82,6 +82,7 @@ export default {
                 get: 'Getter'
             }
         },
+
         DirectRequest: {
             shard: 'ShardIdentifier',
             encoded_text: 'Vec<u8>'

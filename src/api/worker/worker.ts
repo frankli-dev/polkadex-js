@@ -1,10 +1,10 @@
 import {Keyring} from '@polkadot/keyring'
 import {hexToU8a, u8aToHex} from '@polkadot/util';
+import type {u32} from '@polkadot/types';
 import {TypeRegistry} from '@polkadot/types';
 import {RegistryTypes} from '@polkadot/types/types';
 import WebSocketAsPromised from 'websocket-as-promised';
 import type {KeyringPair} from '@polkadot/keyring/types';
-import type {u32} from '@polkadot/types';
 import type {DirectRequest, PlaceOrderArgs, TrustedCallSigned, TrustedOperation} from '../../types/interfaces';
 import {IPolkadexWorker, WorkerOptions} from "./interface";
 import {createDirectRequest, createTrustedCall, createTrustedOperation, TrustedCallArgs} from "./trustedCallApi";
@@ -16,9 +16,12 @@ const unwrapWorkerResponse = (self: IPolkadexWorker, data: string) => {
     const dataTyped = self.createType('Option<WorkerEncoded>', hexToU8a('0x'.concat(data)))
         .unwrapOrDefault(); // (Option<Value.enc>.enc+whitespacePad)
     const trimmed = u8aToHex(dataTyped).replace(/(20)+$/, '');
-    const unwrappedData = self.createType('Option<WorkerEncoded>', hexToU8a(trimmed))
-        .unwrapOrDefault();
-    return unwrappedData
+    return self.createType('Option<WorkerEncoded>', hexToU8a(trimmed))
+        .unwrapOrDefault()
+}
+
+const noOp = (data: any) => {
+    return data
 }
 
 const parseGetterResponse = (self: IPolkadexWorker, responseType: string, data: string) => {
@@ -53,7 +56,7 @@ export class PolkadexWorker extends WebSocketAsPromised implements IPolkadexWork
     constructor(url: string, options: WorkerOptions = {} as WorkerOptions) {
         super(url, {
             createWebSocket: (options.createWebSocket || undefined),
-            packMessage: (data: any) => this.createType('DirectRequest', data).toU8a(),
+            packMessage: (data: any) => noOp(data),
             unpackMessage: (data: any) => parseGetterResponse(this, this.rqStack.shift() || '', data),
             attachRequestId: (data: any, requestId: string | number): any => data,
             extractRequestId: (data: any) => this.rsCount = ++this.rsCount
@@ -91,8 +94,17 @@ export class PolkadexWorker extends WebSocketAsPromised implements IPolkadexWork
         return createTrustedOperation(this, ['direct_call', 'TrustedCallSigned'], trustedCallSigned)
     }
 
-    public createRequest(trustedOperation: TrustedOperation, mrenclave: string): DirectRequest{
+    public createRequest(trustedOperation: TrustedOperation, mrenclave: string): DirectRequest {
         return createDirectRequest(this, trustedOperation, mrenclave)
+    }
+
+    public composeJSONRpcCall(method: string, data: DirectRequest): string {
+        return JSON.stringify({
+            jsonrpc: "2.0",
+            method,
+            params: Array.from(data.toU8a()),
+            id: 1
+        })
     }
 
 }
