@@ -75,7 +75,7 @@ export const localNetwork = () => {
             TrustedCallSigned: {
                 call: 'TrustedCall',
                 nonce: 'Index',
-                signature: 'Signature'
+                signature: 'MultiSignature'
             },
             TrustedOperation: {
                 _enum: {

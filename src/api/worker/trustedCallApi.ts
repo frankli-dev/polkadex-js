@@ -40,7 +40,9 @@ export const createTrustedCall = (
     // payload.append(&mut shard.encode());
     // NOTE: For now, MRENCLAVE==SHARD
     let payload = new Uint8Array([call.toU8a(), nonce.toU8a(), mrenclave_codec_type.toU8a(), mrenclave_codec_type.toU8a()]);
-    let signature = self.createType('Signature', accountOrPubKey.sign(payload));
+    let signature = self.createType('MultiSignature', {
+        ['Sr25519']: accountOrPubKey.sign(payload)
+    });
     console.log("Signature: ", signature.toHex())
     return self.createType('TrustedCallSigned', {
         call: call,
@@ -70,7 +72,8 @@ export const createDirectRequest = (
     console.log("shard" + shard)
     // TODO: Line 72 has some problem
     let encoded_txt = self.createType("Vec<u8>", trustedOperation.toHex());
-    return self.createType("DirectRequest", [shard,encoded_txt])
+    console.log("U8a version: ",Array.from(trustedOperation.toU8a()).toString());
+    return self.createType("DirectRequest", [shard,Array.from(trustedOperation.toU8a())])
 }
 
 

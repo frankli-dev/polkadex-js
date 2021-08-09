@@ -55,11 +55,6 @@ describe('Worker Tests', async () => {
 
         const direct_request = worker.createdirectRequest(trustedOperation, network.mrenclave);
 
-        const shard = worker.createType('ShardIdentifier',bs58.decode(network.mrenclave));
-        const encoded_txt = worker.createType('Vec<u8>',[0,1,2,3]);
-        const sample = worker.createType('DirectRequest',[shard, encoded_txt]);
-        console.log("Sample Encoded: ",sample.toHex())
-
         // TODO: There one character difference with test value from rust code, resulting in unit test failure
         expect(direct_request.toHex().slice(0, -128)).to.equal(PlaceOrderTestValues().direct_request);
 
