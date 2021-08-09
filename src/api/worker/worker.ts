@@ -24,25 +24,8 @@ const noOp = (data: any) => {
     return data
 }
 
-const parseGetterResponse = (self: IPolkadexWorker, responseType: string, data: string) => {
-    if (data === 'Could not decode request') {
-        throw new Error(`Worker error: ${data}`);
-    }
-    let parsedData: any;
-    try {
-        switch (responseType) {
-            case 'raw':
-                parsedData = unwrapWorkerResponse(self, data);
-                break;
-            default:
-                parsedData = unwrapWorkerResponse(self, data);
-                parsedData = self.createType(responseType, parsedData);
-                break;
-        }
-    } catch (err) {
-        throw new Error(`Can't parse into ${responseType}:\n${err}`);
-    }
-    return parsedData;
+const parseOrderbookResponse = (self: IPolkadexWorker, data: string) => {
+    return self.createType('RpcReturnValue', JSON.parse(data).result)
 }
 
 export class PolkadexWorker extends WebSocketAsPromised implements IPolkadexWorker {
@@ -57,7 +40,7 @@ export class PolkadexWorker extends WebSocketAsPromised implements IPolkadexWork
         super(url, {
             createWebSocket: (options.createWebSocket || undefined),
             packMessage: (data: any) => noOp(data),
-            unpackMessage: (data: any) => parseGetterResponse(this, this.rqStack.shift() || '', data),
+            unpackMessage: (data: any) => parseOrderbookResponse(this, data),
             attachRequestId: (data: any, requestId: string | number): any => data,
             extractRequestId: (data: any) => this.rsCount = ++this.rsCount
         });

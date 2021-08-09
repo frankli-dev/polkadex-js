@@ -49,7 +49,7 @@ import type { Bounty, BountyIndex, BountyStatus, BountyStatusActive, BountyStatu
 import type { Multiplier } from '@polkadot/types/interfaces/txpayment';
 import type { Multisig, Timepoint } from '@polkadot/types/interfaces/utility';
 import type { VestingInfo } from '@polkadot/types/interfaces/vesting';
-import type { CancelOrder, CancelOrderArgs, CurrencyId, DirectRequest, Getter, MarketId, Order, OrderSide, OrderType, OrderUUID, PlaceOrderArgs, PublicGetter, ShardIdentifier, TrustedCall, TrustedCallSigned, TrustedGetter, TrustedGetterSigned, TrustedOperation, UserId, WithdrawArgs, balanceSetBalanceArgs, balanceShieldArgs, balanceTransferArgs, balanceUnshieldArgs } from 'polkadexjs/interfaces/ocex';
+import type { CancelOrder, CancelOrderArgs, CurrencyId, DirectRequest, DirectRequestStatus, Getter, MarketId, Order, OrderSide, OrderType, OrderUUID, PlaceOrderArgs, PublicGetter, RpcReturnValue, ShardIdentifier, TrustedCall, TrustedCallSigned, TrustedGetter, TrustedGetterSigned, TrustedOperation, TrustedOperationStatus, UserId, WithdrawArgs, balanceSetBalanceArgs, balanceShieldArgs, balanceTransferArgs, balanceUnshieldArgs } from 'polkadexjs/interfaces/ocex';
 
 declare module '@polkadot/types/types/registry' {
   export interface InterfaceTypes {
@@ -1942,6 +1942,15 @@ declare module '@polkadot/types/types/registry' {
     TrustedOperation: TrustedOperation;
     'Option<TrustedOperation>': Option<TrustedOperation>;
     'Vec<TrustedOperation>': Vec<TrustedOperation>;
+    TrustedOperationStatus: TrustedOperationStatus;
+    'Option<TrustedOperationStatus>': Option<TrustedOperationStatus>;
+    'Vec<TrustedOperationStatus>': Vec<TrustedOperationStatus>;
+    DirectRequestStatus: DirectRequestStatus;
+    'Option<DirectRequestStatus>': Option<DirectRequestStatus>;
+    'Vec<DirectRequestStatus>': Vec<DirectRequestStatus>;
+    RpcReturnValue: RpcReturnValue;
+    'Option<RpcReturnValue>': Option<RpcReturnValue>;
+    'Vec<RpcReturnValue>': Vec<RpcReturnValue>;
     DirectRequest: DirectRequest;
     'Option<DirectRequest>': Option<DirectRequest>;
     'Vec<DirectRequest>': Vec<DirectRequest>;

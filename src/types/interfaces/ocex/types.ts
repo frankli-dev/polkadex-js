@@ -1,7 +1,7 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
-import type { Bytes, Enum, Option, Struct, u128 } from '@polkadot/types';
+import type { Bytes, Enum, Option, Struct, bool, u128 } from '@polkadot/types';
 import type { ITuple } from '@polkadot/types/types';
 import type { Signature } from '@polkadot/types/interfaces/extrinsics';
 import type { AccountId, Balance, H160, H256, Index } from '@polkadot/types/interfaces/runtime';
@@ -45,6 +45,14 @@ export interface CurrencyId extends AssetId {}
 export interface DirectRequest extends Struct {
   readonly shard: ShardIdentifier;
   readonly encoded_text: Bytes;
+}
+
+/** @name DirectRequestStatus */
+export interface DirectRequestStatus extends Enum {
+  readonly isOk: boolean;
+  readonly isTrustedOperationStatus: boolean;
+  readonly asTrustedOperationStatus: TrustedOperationStatus;
+  readonly isError: boolean;
 }
 
 /** @name Getter */
@@ -95,6 +103,13 @@ export interface PlaceOrderArgs extends ITuple<[AccountId, Order, Option<Account
 /** @name PublicGetter */
 export interface PublicGetter extends Enum {
   readonly isSomeValue: boolean;
+}
+
+/** @name RpcReturnValue */
+export interface RpcReturnValue extends Struct {
+  readonly value: Bytes;
+  readonly do_watch: bool;
+  readonly status: DirectRequestStatus;
 }
 
 /** @name ShardIdentifier */
@@ -151,6 +166,22 @@ export interface TrustedOperation extends Enum {
   readonly asDirectCall: TrustedCallSigned;
   readonly isGet: boolean;
   readonly asGet: Getter;
+}
+
+/** @name TrustedOperationStatus */
+export interface TrustedOperationStatus extends Enum {
+  readonly isSubmitted: boolean;
+  readonly isFuture: boolean;
+  readonly isReady: boolean;
+  readonly isBroadcast: boolean;
+  readonly isInSidechainBlock: boolean;
+  readonly asInSidechainBlock: H256;
+  readonly isRetracted: boolean;
+  readonly isFinalityTimeout: boolean;
+  readonly isFinalized: boolean;
+  readonly isUsurped: boolean;
+  readonly isDropped: boolean;
+  readonly isInvalid: boolean;
 }
 
 /** @name UserId */
