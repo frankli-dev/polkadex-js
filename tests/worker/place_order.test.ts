@@ -54,18 +54,16 @@ describe('Worker Tests', async () => {
         expect(trustedOperation.toHex().slice(0, -128)).to.equal(PlaceOrderTestValues().trustedOperation);
 
         const direct_request = worker.createdirectRequest(trustedOperation, network.mrenclave);
-
-        // TODO: There one character difference with test value from rust code, resulting in unit test failure
         expect(direct_request.toHex().slice(0, -128)).to.equal(PlaceOrderTestValues().direct_request);
 
         const rpc_request = worker.composeJSONRpcCall("place_order",direct_request);
-        console.log("Opening WS...");
-        await worker.open()
-        console.log("Opened WS");
-        worker.sendRequest(rpc_request).then(result => {
-            worker.close()
-            console.log("Result: ",result)
-        });
+        // console.log("Opening WS...");
+        // await worker.open()
+        // console.log("Opened WS");
+        // worker.sendRequest(rpc_request).then(result => {
+        //     worker.close()
+        //     console.log("Result: ",result)
+        // });
     });
 
 });

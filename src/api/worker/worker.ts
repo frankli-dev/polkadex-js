@@ -12,17 +12,19 @@ import type {
     TrustedCallSigned,
     TrustedOperation
 } from '../../types/interfaces';
+import {Order} from "../../types/interfaces";
 import {IPolkadexWorker, WorkerOptions} from "./interface";
 import {createDirectRequest, createTrustedCall, createTrustedOperation, TrustedCallArgs} from "./trustedCallApi";
 
 const parseOrderbookResponse = (self: IPolkadexWorker, data: string): RpcReturnValue => {
-    let result = self.createType('RpcReturnValue', hexToU8a("0x"+toHexString(JSON.parse(data).result)));
-    console.log("Result (decoded): ",JSON.parse(result.toString()))
-    if(JSON.parse(result.toString())["status"]["Error"] == null){
-        console.log("Error: ",uintToString(self.createType('Vec<u8>',JSON.parse(result.toString())["value"]).toU8a()))
+    let result = self.createType('RpcReturnValue', hexToU8a("0x" + toHexString(JSON.parse(data).result)));
+    console.log("Result (decoded): ", JSON.parse(result.toString()))
+    if (JSON.parse(result.toString())["status"]["Error"] == null) {
+        console.log("Error: ", uintToString(self.createType('Vec<u8>', JSON.parse(result.toString())["value"]).toU8a()))
     }
     return result
 }
+
 
 export class PolkadexWorker extends WebSocketAsPromised implements IPolkadexWorker {
     readonly #registry: TypeRegistry;
@@ -31,6 +33,9 @@ export class PolkadexWorker extends WebSocketAsPromised implements IPolkadexWork
 
     rqStack: string[];
     rsCount: number;
+    mrenclave: string;
+    // This is hardcoded constant for now
+    market_type: [116, 114, 117, 115, 116, 101, 100];
 
     constructor(url: string, options: WorkerOptions = {} as WorkerOptions) {
         super(url, {
@@ -43,6 +48,7 @@ export class PolkadexWorker extends WebSocketAsPromised implements IPolkadexWork
         const {api, types} = options;
         this.#keyring = (options.keyring || undefined);
         this.#registry = new TypeRegistry();
+        this.mrenclave = "";
         this.rsCount = 0;
         this.rqStack = [] as string[]
         // if (api) {
@@ -63,6 +69,32 @@ export class PolkadexWorker extends WebSocketAsPromised implements IPolkadexWork
 
     public setKeyring(keyring: Keyring): void {
         this.#keyring = keyring;
+    }
+
+    public setMRENCLAVE(mrenclave: string): void {
+        this.mrenclave = mrenclave
+    }
+
+    // Implements the Place Order Call
+    public async placeOrder(account: KeyringPair, nonce: number, baseAsset: string, quoteAsset: string, ordertype: string, orderSide: string, Price: number, Quantity: number) {
+        const user_id = this.createType('UserId', account.address);
+        const base = this.createType("AssetId", baseAsset);
+        const quote = this.createType("AssetId", quoteAsset);
+        const market_id = this.createType('MarketId', [base, quote]);
+        const market_type = this.createType('Bytes', this.market_type);
+        const order_type = this.createType('OrderType', ordertype);
+        const side = this.createType('OrderSide', orderSide);
+        const quantity = this.createType('u128', Quantity);
+        const price = this.createType('Option<u128>', Price);
+        const order: Order = this.createType('Order', [user_id, market_id, market_type, order_type, side, quantity, price]);
+        const nonce_type = this.createType('u32', 0);
+        const place_order_params = this.createType('PlaceOrderArgs', [account.address, order, account.address]);
+        let trustedOperation = this.trustedOperationDirectCall(this.trustedCallPlaceOrder(account, this.mrenclave, nonce_type, place_order_params));
+        let rpc_call = this.composeJSONRpcCall("place_order", this.createdirectRequest(trustedOperation, this.mrenclave));
+        if (!this.isOpened) {
+            this.open()
+        }
+        return await this.sendRequest(rpc_call)
     }
 
     public trustedCallPlaceOrder(accountOrPubKey: KeyringPair, mrenclave: string, nonce: u32, params: TrustedCallArgs): TrustedCallSigned {
@@ -89,7 +121,7 @@ export class PolkadexWorker extends WebSocketAsPromised implements IPolkadexWork
 }
 
 function toHexString(byteArray) {
-    return Array.from(byteArray, function(byte) {
+    return Array.from(byteArray, function (byte) {
         // @ts-ignore
         return ('0' + (byte & 0xFF).toString(16)).slice(-2);
     }).join('')

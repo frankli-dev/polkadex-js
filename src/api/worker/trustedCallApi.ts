@@ -43,7 +43,6 @@ export const createTrustedCall = (
     let signature = self.createType('MultiSignature', {
         ['Sr25519']: accountOrPubKey.sign(payload)
     });
-    console.log("Signature: ", signature.toHex())
     return self.createType('TrustedCallSigned', {
         call: call,
         nonce: nonce,
@@ -69,21 +68,6 @@ export const createDirectRequest = (
     mrenclave: string
 ): DirectRequest => {
     let shard = self.createType("ShardIdentifier", bs58.decode(mrenclave));
-    console.log("shard" + shard)
-    // TODO: Line 72 has some problem
     let encoded_txt = self.createType("Vec<u8>", trustedOperation.toHex());
-    console.log("U8a version: ",Array.from(trustedOperation.toU8a()).toString());
-    return self.createType("DirectRequest", [shard,Array.from(trustedOperation.toU8a())])
+    return self.createType("DirectRequest", [shard, encoded_txt])
 }
-
-
-
-// export const createDirectRequest = (
-//     self: IPolkadexWorker,
-//     trustedOperation: TrustedOperation,
-//     mrenclave: string
-// ): DirectRequest => {
-//     let shard = self.createType("ShardIdentifier", bs58.decode(mrenclave));
-//     let encoded_txt = self.createType("Vec<u8>", Array.from(trustedOperation.toU8a()));
-//     return self.createType("DirectRequest", [shard, Array.from(trustedOperation.toU8a())])
-// }
