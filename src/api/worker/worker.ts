@@ -15,6 +15,7 @@ import type {
 import {Order} from "../../types/interfaces";
 import {IPolkadexWorker, WorkerOptions} from "./interface";
 import {createDirectRequest, createTrustedCall, createTrustedOperation, TrustedCallArgs} from "./trustedCallApi";
+import {Key} from "@polkadot/types/interfaces/system";
 
 const parseOrderbookResponse = (self: IPolkadexWorker, data: string): RpcReturnValue => {
     let result = self.createType('RpcReturnValue', hexToU8a("0x" + toHexString(JSON.parse(data).result)));
@@ -75,7 +76,7 @@ export class PolkadexWorker extends WebSocketAsPromised implements IPolkadexWork
         this.mrenclave = mrenclave
     }
 
-    // Implements the Place Order Call
+    // Creates the required types and place the order to orderbook and returns the result
     public async placeOrder(account: KeyringPair, nonce: number, baseAsset: string, quoteAsset: string, ordertype: string, orderSide: string, Price: number, Quantity: number) {
         const user_id = this.createType('UserId', account.address);
         const base = this.createType("AssetId", baseAsset);
@@ -87,12 +88,12 @@ export class PolkadexWorker extends WebSocketAsPromised implements IPolkadexWork
         const quantity = this.createType('u128', Quantity);
         const price = this.createType('Option<u128>', Price);
         const order: Order = this.createType('Order', [user_id, market_id, market_type, order_type, side, quantity, price]);
-        const nonce_type = this.createType('u32', 0);
+        const nonce_type = this.createType('u32', nonce);
         const place_order_params = this.createType('PlaceOrderArgs', [account.address, order, account.address]);
         let trustedOperation = this.trustedOperationDirectCall(this.trustedCallPlaceOrder(account, this.mrenclave, nonce_type, place_order_params));
         let rpc_call = this.composeJSONRpcCall("place_order", this.createdirectRequest(trustedOperation, this.mrenclave));
         if (!this.isOpened) {
-            this.open()
+            await this.open()
         }
         return await this.sendRequest(rpc_call)
     }
@@ -101,6 +102,42 @@ export class PolkadexWorker extends WebSocketAsPromised implements IPolkadexWork
         return createTrustedCall(this, ['place_order', 'PlaceOrderArgs'], accountOrPubKey, mrenclave, nonce, params)
     }
 
+    // Creates the required types and cancels the order in orderbook and returns the result
+    public async cancelOrder(account: KeyringPair, nonce: number, baseAsset: string, quoteAsset: string, order_uuid: Uint8Array) {
+        const user_id = this.createType('UserId', account.address);
+        const base = this.createType("AssetId", baseAsset);
+        const quote = this.createType("AssetId", quoteAsset);
+        const market_id = this.createType('MarketId', [base, quote]);
+        const order_uuid_type = this.createType('Vec<u8>', Array.from(order_uuid));
+        const cancelled_order = this.createType('CancelOrder', [user_id, market_id, order_uuid_type]);
+        const nonce_type = this.createType('u32', nonce);
+        const cancel_order_params = this.createType('CancelOrderArgs', [account.address, cancelled_order, account.address]);
+        let trustedOperation = this.trustedOperationDirectCall(createTrustedCall(this, ['cancel_order', 'CancelOrderArgs'], account, this.mrenclave, nonce_type, cancel_order_params));
+        let rpc_call = this.composeJSONRpcCall("place_order", this.createdirectRequest(trustedOperation, this.mrenclave));
+        if (!this.isOpened) {
+            await this.open()
+        }
+        return await this.sendRequest(rpc_call)
+    }
+
+    public trustedCallCancelOrder(accountOrPubKey: KeyringPair, mrenclave: string, nonce: u32, params: TrustedCallArgs): TrustedCallSigned {
+        return createTrustedCall(this, ['cancel_order', 'CancelOrderArgs'], accountOrPubKey, mrenclave, nonce, params)
+    }
+
+    public async withdraw(account: KeyringPair, nonce: number, assetId: string, quantity: number) {
+        const asset_id = this.createType("AssetId", assetId);
+        const Quantity = this.createType('u128', quantity);
+        const nonce_type = this.createType('u32', nonce);
+        const withdraw_params = this.createType('CancelOrderArgs', [account.address, asset_id, Quantity, account.address]);
+        let trustedOperation = this.trustedOperationDirectCall(createTrustedCall(this, ['withdraw', 'WithdrawArgs'], account, this.mrenclave, nonce_type, withdraw_params));
+        let rpc_call = this.composeJSONRpcCall("place_order", this.createdirectRequest(trustedOperation, this.mrenclave));
+        if (!this.isOpened) {
+            await this.open()
+        }
+        return await this.sendRequest(rpc_call)
+    }
+
+    // Helper functions
     public trustedOperationDirectCall(trustedCallSigned: TrustedCallSigned): TrustedOperation {
         return createTrustedOperation(this, ['direct_call', 'TrustedCallSigned'], trustedCallSigned)
     }
