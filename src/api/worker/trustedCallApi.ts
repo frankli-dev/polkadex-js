@@ -58,7 +58,6 @@ export const createTrustedOperation = (
         [variant]: self.createType(argType, signedCall)
     });
 }
-import { hexToU8a } from '@polkadot/util';
 
 export const createDirectRequest = (
     self: IPolkadexWorker,

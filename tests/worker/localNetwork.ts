@@ -1,10 +1,10 @@
 export const localNetwork = () => {
     return {
         chain: 'ws://127.0.0.1:9979',
-        worker: 'ws://127.0.0.1:2079',
+        worker: 'ws://88.198.24.21:8020',
         mrenclave: '31kgJRyQ6Atu3bVwJEzcXLoMQRLJjgEnZNmhakq5gMQY',
         types: {
-            ShardIdentifier: 'Hash',
+            ShardIdentifier: 'H256',
             UserId: 'AccountId',
             Order: {
                 user_uid: 'UserId',
@@ -78,6 +78,46 @@ export const localNetwork = () => {
                     direct_call: 'TrustedCallSigned',
                     get: 'Getter'
                 }
+            },
+            TrustedOperationStatus: {
+                _enum:{
+                    /// TrustedOperation is submitted to the top pool.
+                    Submitted: null,
+                    /// TrustedOperation is part of the future queue.
+                    Future: null,
+                    /// TrustedOperation is part of the ready queue.
+                    Ready: null,
+                    /// The operation has been broadcast to the given peers.
+                    Broadcast: null,
+                    /// TrustedOperation has been included in block with given hash.
+                    InSidechainBlock: 'H256',
+                    /// The block this operation was included in has been retracted.
+                    Retracted: null,
+                    /// Maximum number of finality watchers has been reached,
+                    /// old watchers are being removed.
+                    FinalityTimeout: null,
+                    /// TrustedOperation has been finalized by a finality-gadget, e.g GRANDPA
+                    Finalized: null,
+                    /// TrustedOperation has been replaced in the pool, by another operation
+                    /// that provides the same tags. (e.g. same (sender, nonce)).
+                    Usurped: null,
+                    /// TrustedOperation has been dropped from the pool because of the limit.
+                    Dropped: null,
+                    /// TrustedOperation is no longer valid in the current state.
+                    Invalid: null,
+                }
+            },
+            DirectRequestStatus: {
+                _enum: {
+                    Ok: null,
+                    TrustedOperationStatus: 'TrustedOperationStatus',
+                    Error: null
+                }
+            },
+            RpcReturnValue: {
+                value: 'Vec<u8>',
+                do_watch: 'bool',
+                status: 'DirectRequestStatus'
             },
             DirectRequest: {
                 shard: 'ShardIdentifier',

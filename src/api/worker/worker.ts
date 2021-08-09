@@ -1,31 +1,27 @@
 import {Keyring} from '@polkadot/keyring'
-import {hexToU8a, u8aToHex} from '@polkadot/util';
+import {hexToU8a} from '@polkadot/util';
 import type {u32} from '@polkadot/types';
 import {TypeRegistry} from '@polkadot/types';
 import {RegistryTypes} from '@polkadot/types/types';
 import WebSocketAsPromised from 'websocket-as-promised';
 import type {KeyringPair} from '@polkadot/keyring/types';
-import type {DirectRequest, PlaceOrderArgs, TrustedCallSigned, TrustedOperation} from '../../types/interfaces';
+import type {
+    DirectRequest,
+    PlaceOrderArgs,
+    RpcReturnValue,
+    TrustedCallSigned,
+    TrustedOperation
+} from '../../types/interfaces';
 import {IPolkadexWorker, WorkerOptions} from "./interface";
 import {createDirectRequest, createTrustedCall, createTrustedOperation, TrustedCallArgs} from "./trustedCallApi";
 
-const unwrapWorkerResponse = (self: IPolkadexWorker, data: string) => {
-    /// Unwraps the value that is wrapped in all the Options and encoding from the worker.
-    /// Defaults to return `[]`, which is fine as `createType(api.registry, <type>, [])`
-    /// instantiates the <type> with its default value.
-    const dataTyped = self.createType('Option<WorkerEncoded>', hexToU8a('0x'.concat(data)))
-        .unwrapOrDefault(); // (Option<Value.enc>.enc+whitespacePad)
-    const trimmed = u8aToHex(dataTyped).replace(/(20)+$/, '');
-    return self.createType('Option<WorkerEncoded>', hexToU8a(trimmed))
-        .unwrapOrDefault()
-}
-
-const noOp = (data: any) => {
-    return data
-}
-
-const parseOrderbookResponse = (self: IPolkadexWorker, data: string) => {
-    return self.createType('RpcReturnValue', JSON.parse(data).result)
+const parseOrderbookResponse = (self: IPolkadexWorker, data: string): RpcReturnValue => {
+    let result = self.createType('RpcReturnValue', hexToU8a("0x"+toHexString(JSON.parse(data).result)));
+    console.log("Result (decoded): ",JSON.parse(result.toString()))
+    if(JSON.parse(result.toString())["status"]["Error"] == null){
+        console.log("Error: ",uintToString(self.createType('Vec<u8>',JSON.parse(result.toString())["value"]).toU8a()))
+    }
+    return result
 }
 
 export class PolkadexWorker extends WebSocketAsPromised implements IPolkadexWorker {
@@ -39,7 +35,7 @@ export class PolkadexWorker extends WebSocketAsPromised implements IPolkadexWork
     constructor(url: string, options: WorkerOptions = {} as WorkerOptions) {
         super(url, {
             createWebSocket: (options.createWebSocket || undefined),
-            packMessage: (data: any) => noOp(data),
+            packMessage: (data: any) => data,
             unpackMessage: (data: any) => parseOrderbookResponse(this, data),
             attachRequestId: (data: any, requestId: string | number): any => data,
             extractRequestId: (data: any) => this.rsCount = ++this.rsCount
@@ -90,4 +86,15 @@ export class PolkadexWorker extends WebSocketAsPromised implements IPolkadexWork
         })
     }
 
+}
+
+function toHexString(byteArray) {
+    return Array.from(byteArray, function(byte) {
+        // @ts-ignore
+        return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+    }).join('')
+}
+
+function uintToString(uintArray) {
+    return new TextDecoder().decode(uintArray)
 }
