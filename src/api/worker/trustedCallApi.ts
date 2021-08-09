@@ -9,6 +9,7 @@ import {
 } from "../../types/interfaces";
 import {IPolkadexWorker} from "./interface";
 import bs58 from "bs58";
+import {compactAddLength} from '@polkadot/util';
 
 export type TrustedCallArgs = (PlaceOrderArgs | CancelOrderArgs | WithdrawArgs);
 
@@ -59,12 +60,27 @@ export const createTrustedOperation = (
     });
 }
 
+
 export const createDirectRequest = (
     self: IPolkadexWorker,
     trustedOperation: TrustedOperation,
     mrenclave: string
 ): DirectRequest => {
     let shard = self.createType("ShardIdentifier", bs58.decode(mrenclave));
+    console.log("shard" + shard)
+    // TODO: Line 72 has some problem
     let encoded_txt = self.createType("Vec<u8>", trustedOperation.toHex());
-    return self.createType("DirectRequest", [shard, encoded_txt])
+    return self.createType("DirectRequest", [shard,encoded_txt])
 }
+
+
+
+// export const createDirectRequest = (
+//     self: IPolkadexWorker,
+//     trustedOperation: TrustedOperation,
+//     mrenclave: string
+// ): DirectRequest => {
+//     let shard = self.createType("ShardIdentifier", bs58.decode(mrenclave));
+//     let encoded_txt = self.createType("Vec<u8>", Array.from(trustedOperation.toU8a()));
+//     return self.createType("DirectRequest", [shard, Array.from(trustedOperation.toU8a())])
+// }

@@ -6,6 +6,7 @@ export const localNetwork = () => {
         types: {
             ShardIdentifier: 'H256',
             UserId: 'AccountId',
+            OrderUUID: 'Vec<u8>',
             Order: {
                 user_uid: 'UserId',
                 market_id: 'MarketId',
@@ -16,7 +17,11 @@ export const localNetwork = () => {
                 price: 'Option<u128>'
 
             },
-            CancelOrder: {},
+            CancelOrder: {
+                user_uid: 'UserId',
+                market_id: 'MarketId',
+                order_id: 'OrderUUID'
+            },
             OrderSide: {
                 _enum: {
                     BID: null,

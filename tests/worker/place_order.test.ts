@@ -5,7 +5,7 @@ import {cryptoWaitReady} from '@polkadot/util-crypto';
 import {localNetwork} from './localNetwork';
 import WS from 'websocket';
 import {PlaceOrderTestValues} from "./test_values";
-
+import bs58 from "bs58";
 const {w3cwebsocket: WebSocket} = WS;
 
 import * as mocha from 'mocha';
@@ -52,11 +52,18 @@ describe('Worker Tests', async () => {
 
         const trustedOperation = worker.trustedOperationDirectCall(trustedcallsigned);
         expect(trustedOperation.toHex().slice(0, -128)).to.equal(PlaceOrderTestValues().trustedOperation);
-        const direct_request = worker.createRequest(trustedOperation, network.mrenclave);
-        const rpc_request = worker.composeJSONRpcCall("place_order",direct_request);
-        console.log("direct_request: ", rpc_request);
+
+        const direct_request = worker.createdirectRequest(trustedOperation, network.mrenclave);
+
+        const shard = worker.createType('ShardIdentifier',bs58.decode(network.mrenclave));
+        const encoded_txt = worker.createType('Vec<u8>',[0,1,2,3]);
+        const sample = worker.createType('DirectRequest',[shard, encoded_txt]);
+        console.log("Sample Encoded: ",sample.toHex())
+
         // TODO: There one character difference with test value from rust code, resulting in unit test failure
         expect(direct_request.toHex().slice(0, -128)).to.equal(PlaceOrderTestValues().direct_request);
+
+        const rpc_request = worker.composeJSONRpcCall("place_order",direct_request);
         console.log("Opening WS...");
         await worker.open()
         console.log("Opened WS");

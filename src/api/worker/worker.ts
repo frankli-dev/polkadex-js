@@ -73,7 +73,7 @@ export class PolkadexWorker extends WebSocketAsPromised implements IPolkadexWork
         return createTrustedOperation(this, ['direct_call', 'TrustedCallSigned'], trustedCallSigned)
     }
 
-    public createRequest(trustedOperation: TrustedOperation, mrenclave: string): DirectRequest {
+    public createdirectRequest(trustedOperation: TrustedOperation, mrenclave: string): DirectRequest {
         return createDirectRequest(this, trustedOperation, mrenclave)
     }
 
